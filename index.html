@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de J-Card para Fita Cassette</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Permanent+Marker&family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --surface: #16213e;
+            --surface2: #0f3460;
+            --text: #e0e0e0;
+            --text2: #b0b0b0;
+            --accent: #e94560;
+            --accent2: #ff6b6b;
+            --border: #2a2a4a;
+            --input-bg: #1e1e38;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .header .logo {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .version {
+            font-size: 0.7rem;
+            color: var(--text2);
+            margin-left: auto;
+            opacity: 0.7;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+            height: calc(100vh - 52px);
+        }
+
+        /* Painel de Controle */
+        .control-panel {
+            width: 420px;
+            min-width: 420px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+            gap: 14px;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--surface2) transparent;
+        }
+        .control-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .control-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .control-panel::-webkit-scrollbar-thumb {
+            background: var(--surface2);
+            border-radius: 10px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i {
+            font-size: 0.85rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text2);
+            letter-spacing: 0.2px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            resize: vertical;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233, 68, 96, 0.1);
+        }
+        .form-group textarea {
+            min-height: 70px;
+            max-height: 130px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            font-family: 'VT323', 'Courier New', monospace;
+            letter-spacing: 0.3px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .color-inputs input[type="color"] {
+            width: 38px;
+            height: 34px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 2px;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .color-inputs input[type="color"]:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+        .color-inputs span {
+            font-size: 0.7rem;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .template-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .template-chip {
+            padding: 7px 13px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1.5px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text2);
+            transition: all 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .template-chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+        .template-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(233, 68, 96, 0.35);
+        }
+        .btn-primary:hover {
+            background: #ff5a75;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 68, 96, 0.5);
+        }
+        .btn-secondary {
+            background: var(--surface2);
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: #1a4a80;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            border-radius: 18px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(233, 68, 96, 0.05);
+        }
+        .file-upload-area.has-image {
+            border-style: solid;
+            border-color: #4caf84;
+            background: rgba(76, 175, 132, 0.08);
+        }
+        .file-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-upload-area .upload-text {
+            font-size: 0.75rem;
+            color: var(--text2);
+            pointer-events: none;
+        }
+        .file-upload-area .upload-icon {
+            font-size: 1.8rem;
+            color: var(--text2);
+            pointer-events: none;
+        }
+
+        /* Preview Area */
+        .preview-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111118;
+            background-image:
+                radial-gradient(ellipse at center, rgba(233, 68, 96, 0.03) 0%, transparent 70%),
+                radial-gradient(circle at 30% 50%, rgba(15, 52, 96, 0.15) 0%, transparent 50%);
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preview-hint {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text2);
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .preview-wrapper {
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
+
+        /* J-Card */
+        .jcard {
+            display: flex;
+            width: 157mm;
+            height: 102mm;
+            background: #fff;
+            color: #111;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border-radius: 1px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+            font-family: 'Inter', 'Arial', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .jcard-section {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            border-right: 1px dashed rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .jcard-section:last-child {
+            border-right: none;
+        }
+
+        /* Aba Lateral Esquerda (Lado A) */
+        .aba-left {
+            width: 12mm;
+            background: #f5f5f5;
+            padding: 4mm 2mm;
+            text-align: center;
+            font-size: 5.5pt;
+            line-height: 1.3;
+            letter-spacing: 0.3px;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 1mm;
+            border-right: 1px dashed rgba(0, 0, 0, 0.25);
+            color: #333;
+        }
+        .aba-left .aba-label {
+            font-weight: 700;
+            font-size: 6pt;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 1mm 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            width: 100%;
+            margin-bottom: 1mm;
+        }
+        .aba-left .aba-content {
+            font-size: 4.8pt;
+            line-height: 1.4;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        /* Painel Frontal */
+        .front-cover {
+            width: 59mm;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4mm;
+            text-align: center;
+            gap: 2mm;
+            position: relative;
+            overflow: hidden;
+        }
+        .front-cover .cover-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.85;
+        }
+        .front-cover .cover-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .front-cover .cover-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2mm;
+            width: 100%;
+            padding: 3mm;
+        }
+        .front-cover .cover-title {
+            font-weight: 700;
+            font-size: 11pt;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .front-cover .cover-artist {
+            font-weight: 500;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+        }
+        .front-cover .cover-info {
+            font-size: 6pt;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+        }
+
+        /* Lombada */
+        .spine {
+            width: 15mm;
+            background: #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3mm 2mm;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 7pt;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+            gap: 2mm;
+            color: #222;
+            border-right: 1px dashed rgba(0, 0, 0, 0.25);
+        }
+        .spine .spine-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 100%;
+        }
+        .spine .spine-separator {
+            font-size: 5pt;
+            opacity: 0.5;
+            letter-spacing: 0;
+        }
+
+        /* Painel Traseiro */
+        .back-cover {
+            width: 59mm;
+            background: #fafafa;
+            padding: 4mm 3mm;
+            display: flex;
+            flex-direction: column;
+            gap: 3mm;
+            font-size: 6.5pt;
+            color: #222;
+            line-height: 1.4;
+        }
+        .back-cover .tracklist-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1mm;
+        }
+        .back-cover .tracklist-header {
+            font-weight: 700;
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1.5px solid #333;
+            padding-bottom: 1mm;
+            margin-bottom: 1mm;
+        }
+        .back-cover .tracklist-item {
+            font-size: 5.8pt;
+            line-height: 1.5;
+            letter-spacing: 0.2px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .back-cover .back-info {
+            margin-top: auto;
+            font-size: 5pt;
+            opacity: 0.6;
+            text-align: center;
+        }
+
+        /* Aba Lateral Direita (Lado B) */
+        .aba-right {
+            width: 12mm;
+            background: #f5f5f5;
+            padding: 4mm 2mm;
+            text-align: center;
+            font-size: 5.5pt;
+            line-height: 1.3;
+            letter-spacing: 0.3px;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 1mm;
+            color: #333;
+        }
+        .aba-right .aba-label {
+            font-weight: 700;
+            font-size: 6pt;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 1mm 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            width: 100%;
+            margin-bottom: 1mm;
+        }
+        .aba-right .aba-content {
+            font-size: 4.8pt;
+            line-height: 1.4;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        /* Dotted fold lines */
+        .fold-line {
+            border-right: 1px dashed rgba(0, 0, 0, 0.35) !important;
+        }
+
+        /* Print-only area */
+        #print-area {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: -9999px;
+            z-index: -1;
+        }
+        #print-area .jcard {
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2d2d4a;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 999;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            letter-spacing: 0.3px;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            border-color: #4caf84;
+            background: #1a3a2a;
+            color: #7dffb3;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .control-panel {
+                width: 100%;
+                min-width: 100%;
+                max-height: 45vh;
+                flex-shrink: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .preview-area {
+                flex: 1;
+                min-height: 40vh;
+            }
+            .preview-wrapper {
+                transform: scale(0.5) !important;
+            }
+        }
+        @media (max-width: 600px) {
+            .control-panel {
+                padding: 10px;
+                gap: 8px;
+                max-height: 40vh;
+            }
+            .preview-wrapper {
+                transform: scale(0.38) !important;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #print-area,
+            #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                display: block !important;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 99999;
+            }
+            #print-area .jcard {
+                width: 157mm;
+                height: 102mm;
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            /* Esconder linhas de dobra na impressão se desejar */
+            /* Descomente para esconder: */
+            /*
+            #print-area .jcard-section {
+                border-right: none !important;
+            }
+            */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header no-print">
+        <span class="logo"><i class="fas fa-compact-disc"></i></span>
+        <h1>Criador de J-Card para Cassette</h1>
+        <span class="version">v2.0</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+
+        <!-- Painel de Controle -->
+        <div class="control-panel no-print" id="controlPanel">
+            <!-- Informações Básicas -->
+            <div class="section-title"><i class="fas fa-info-circle"></i> Informações</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Título do Álbum</label>
+                    <input type="text" id="albumTitle" value="MEU ÁLBUM INCRÍVEL" placeholder="Título do álbum">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Artista / Banda</label>
+                    <input type="text" id="albumArtist" value="ARTISTA FANTÁSTICO" placeholder="Nome do artista">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano / Info Extra</label>
+                    <input type="text" id="albumYear" value="2026" placeholder="Ano, catálogo, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Nº Catálogo</label>
+                    <input type="text" id="albumCatalog" value="CAT-001" placeholder="Nº catálogo">
+                </div>
+            </div>
+
+            <!-- Tracklists -->
+            <div class="section-title"><i class="fas fa-list-ol"></i> Tracklists</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Lado A (uma faixa por linha)</label>
+                    <textarea id="tracklistA" placeholder="1. Faixa Um - 3:45&#10;2. Faixa Dois - 4:20&#10;3. Faixa Três - 2:58&#10;4. Faixa Quatro - 5:12">1. ABERTURA ÉPICA - 3:45
+                        2. NOITE ESTRELADA - 4:20
+                    3. RITMO INFINITO - 2:58</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Lado B (uma faixa por linha)</label>
+                    <textarea id="tracklistB" placeholder="1. Faixa Cinco - 3:10&#10;2. Faixa Seis - 4:55&#10;3. Faixa Sete - 3:30">1. CAMINHOS CRUZADOS - 3:10
+                        2. HORIZONTE - 4:55
+                    3. DESPEDIDA - 3:30</textarea>
+                </div>
+            </div>
+            <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
+                <input type="checkbox" id="autoNumber" checked style="width:16px;height:16px;cursor:pointer;">
+                <label for="autoNumber" style="cursor:pointer;font-size:0.78rem;">Numerar faixas automaticamente</label>
+            </div>
+
+            <!-- Abas Laterais -->
+            <div class="section-title"><i class="fas fa-tape"></i> Abas que Colam na Fita</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Texto Aba - Lado A</label>
+                    <input type="text" id="abaAText" value="LADO A" placeholder="Texto da aba lado A">
+                </div>
+                <div class="form-group">
+                    <label>Texto Aba - Lado B</label>
+                    <input type="text" id="abaBText" value="LADO B" placeholder="Texto da aba lado B">
+                </div>
+            </div>
+
+            <!-- Aparência -->
+            <div class="section-title"><i class="fas fa-palette"></i> Aparência</div>
+            <div class="color-inputs">
+                <span>Fundo Capa:</span>
+                <input type="color" id="bgFront" value="#ffffff" title="Fundo da capa frontal">
+                <span>Fundo Contra:</span>
+                <input type="color" id="bgBack" value="#fafafa" title="Fundo da contracapa">
+                <span>Lombada:</span>
+                <input type="color" id="bgSpine" value="#e0e0e0" title="Fundo da lombada">
+                <span>Texto:</span>
+                <input type="color" id="textColor" value="#111111" title="Cor do texto principal">
+                <span>Abas:</span>
+                <input type="color" id="bgAba" value="#f0f0f0" title="Fundo das abas laterais">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fonte</label>
+                    <select id="fontSelect">
+                        <option value="'Inter','Arial',sans-serif">Inter (Moderna)</option>
+                        <option value="'Georgia','Times New Roman',serif">Serif (Clássica)</option>
+                        <option value="'Courier New',monospace">Monospace (Datilografada)</option>
+                        <option value="'Bebas Neue','Impact',sans-serif">Bebas Neue (Bold)</option>
+                        <option value="'Permanent Marker',cursive">Permanent Marker (Manuscrita)</option>
+                        <option value="'VT323','Courier New',monospace" selected>VT323 (Retrô/Terminal)</option>
+                        <option value="'Press Start 2P',monospace">Press Start 2P (Pixel)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Alinhamento Capa</label>
+                    <select id="alignSelect">
+                        <option value="center" selected>Centralizado</option>
+                        <option value="flex-start">Esquerda</option>
+                        <option value="flex-end">Direita</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Templates -->
+            <div class="section-title"><i class="fas fa-magic"></i> Templates Rápidos</div>
+            <div class="template-chips" id="templateChips">
+                <span class="template-chip" data-template="classic">📼 Clássico</span>
+                <span class="template-chip" data-template="neon">💜 Neon</span>
+                <span class="template-chip" data-template="vintage">📜 Vintage</span>
+                <span class="template-chip" data-template="dark">🌑 Dark</span>
+                <span class="template-chip" data-template="pastel">🌸 Pastel</span>
+                <span class="template-chip" data-template="retro80s">🎧 Anos 80</span>
+            </div>
+
+            <!-- Upload Imagem -->
+            <div class="section-title"><i class="fas fa-image"></i> Imagem da Capa</div>
+            <div class="file-upload-area" id="fileUploadArea">
+                <input type="file" id="coverImageInput" accept="image/*">
+                <span class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                <span class="upload-text">Clique para enviar uma imagem de capa</span>
+            </div>
+            <button class="btn btn-sm btn-outline" id="removeImageBtn" style="display:none;width:100%;">
+                <i class="fas fa-trash"></i> Remover Imagem
+            </button>
+
+            <!-- Botões de Ação -->
+            <div class="section-title"><i class="fas fa-download"></i> Exportar</div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="printBtn">
+                    <i class="fas fa-print"></i> Imprimir J-Card
+                </button>
+                <button class="btn btn-secondary" id="downloadPngBtn">
+                    <i class="fas fa-image"></i> Baixar PNG
+                </button>
+            </div>
+            <p style="font-size:0.65rem;color:var(--text2);opacity:0.7;text-align:center;margin-top:4px;">
+                💡 Dica: Ao imprimir, configure a impressora para <strong>"Tamanho real"</strong> (100% escala) e margens mínimas.
+            </p>
+        </div>
+
+        <!-- Área de Preview -->
+        <div class="preview-area" id="previewArea">
+            <div class="preview-hint">👆 Preview em escala reduzida — o arquivo final sai no tamanho exato (157×102mm)</div>
+            <div class="preview-wrapper" id="previewWrapper">
+                <!-- J-Card Preview (será populado por JS) -->
+                <div class="jcard" id="previewJcard"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Impressão (oculta na tela) -->
+    <div id="print-area">
+        <div class="jcard" id="printJcard"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- html2canvas CDN -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js">
+    </script>
+
+    <script>
+        (function() {
+            // ============ STATE ============
+            const state = {
+                title: 'MEU ÁLBUM INCRÍVEL',
+                artist: 'ARTISTA FANTÁSTICO',
+                year: '2026',
+                catalog: 'CAT-001',
+                tracklistA: '1. ABERTURA ÉPICA - 3:45\n2. NOITE ESTRELADA - 4:20\n3. RITMO INFINITO - 2:58',
+                tracklistB: '1. CAMINHOS CRUZADOS - 3:10\n2. HORIZONTE - 4:55\n3. DESPEDIDA - 3:30',
+                abaAText: 'LADO A',
+                abaBText: 'LADO B',
+                bgFront: '#ffffff',
+                bgBack: '#fafafa',
+                bgSpine: '#e0e0e0',
+                bgAba: '#f0f0f0',
+                textColor: '#111111',
+                fontFamily: "'VT323','Courier New',monospace",
+                align: 'center',
+                autoNumber: true,
+                coverImage: null,
+                activeTemplate: null,
+            };
+
+            // ============ DOM REFS ============
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const previewJcard = $('#previewJcard');
+            const printJcard = $('#printJcard');
+            const previewWrapper = $('#previewWrapper');
+            const previewArea = $('#previewArea');
+            const toast = $('#toast');
+            const fileUploadArea = $('#fileUploadArea');
+            const removeImageBtn = $('#removeImageBtn');
+            const coverImageInput = $('#coverImageInput');
+
+            // ============ FUNCTIONS ============
+
+            function getTracklistArray(text) {
+                if (!text.trim()) return [];
+                return text.split('\n').filter(line => line.trim() !== '');
+            }
+
+            function formatTracklist(text, autoNumber) {
+                const lines = getTracklistArray(text);
+                if (!autoNumber) return lines.join('\n');
+                return lines.map((line, i) => {
+                    // Remove numeração existente e adiciona nova
+                    const cleaned = line.replace(/^\d+[\.\)\-]\s*/, '').trim();
+                    return `${i + 1}. ${cleaned}`;
+                }).join('\n');
+            }
+
+            function generateJCardHTML(st) {
+                const trackA = formatTracklist(st.tracklistA, st.autoNumber);
+                const trackB = formatTracklist(st.tracklistB, st.autoNumber);
+                const hasImage = st.coverImage !== null;
+
+                // Determinar cores de texto para contraste
+                const textColor = st.textColor;
+                const spineTextColor = st.textColor;
+
+                // Imagem de fundo para capa
+                const coverBgStyle = hasImage ?
+                    `background-image: url('${st.coverImage}'); background-size: cover; background-position: center;` :
+                    '';
+
+                // Overlay na capa se tiver imagem
+                const coverOverlayStyle = hasImage ?
+                    `background: rgba(255,255,255,0.55);` :
+                    '';
+
+                return `
+                <div class="jcard-section aba-left fold-line" style="background-color:${st.bgAba};color:${textColor};font-family:${st.fontFamily};">
+                  <div class="aba-label">${escapeHTML(st.abaAText)}</div>
+                  <div class="aba-content">${escapeHTML(trackA.replace(/\n/g, '<br>'))}</div>
+                </div>
+                <div class="jcard-section front-cover" style="background-color:${st.bgFront};color:${textColor};font-family:${st.fontFamily};${coverBgStyle}">
+                  ${hasImage ? `<div class="cover-overlay" style="${coverOverlayStyle}"></div>` : ''}
+                  <div class="cover-content" style="align-items:${st.align};text-align:${st.align === 'center' ? 'center' : (st.align === 'flex-start' ? 'left' : 'right')};">
+                    <div class="cover-title" style="font-size:${st.fontFamily.includes('Press Start') ? '7pt' : '11pt'};">${escapeHTML(st.title)}</div>
+                    <div class="cover-artist">${escapeHTML(st.artist)}</div>
+                    <div class="cover-info">${escapeHTML(st.year)}${st.catalog ? ' · ' + escapeHTML(st.catalog) : ''}</div>
+                  </div>
+                </div>
+                <div class="jcard-section spine fold-line" style="background-color:${st.bgSpine};color:${spineTextColor};font-family:${st.fontFamily};">
+                  <span class="spine-text">${escapeHTML(st.artist)}</span>
+                  <span class="spine-separator">◆</span>
+                  <span class="spine-text">${escapeHTML(st.title)}</span>
+                </div>
+                <div class="jcard-section back-cover" style="background-color:${st.bgBack};color:${textColor};font-family:${st.fontFamily};">
+                  <div class="tracklist-section">
+                    <div class="tracklist-header">LADO A</div>
+                    <div class="tracklist-item">${escapeHTML(trackA)}</div>
+                  </div>
+                  <div class="tracklist-section">
+                    <div class="tracklist-header">LADO B</div>
+                    <div class="tracklist-item">${escapeHTML(trackB)}</div>
+                  </div>
+                  <div class="back-info">${escapeHTML(st.artist)} — ${escapeHTML(st.title)} — ${escapeHTML(st.year)}${st.catalog ? ' [' + escapeHTML(st.catalog) + ']' : ''}</div>
+                </div>
+                <div class="jcard-section aba-right" style="background-color:${st.bgAba};color:${textColor};font-family:${st.fontFamily};">
+                  <div class="aba-label">${escapeHTML(st.abaBText)}</div>
+                  <div class="aba-content">${escapeHTML(trackB.replace(/\n/g, '<br>'))}</div>
+                </div>
+              `;
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function updatePreviews() {
+                const html = generateJCardHTML(state);
+                previewJcard.innerHTML = html;
+                printJcard.innerHTML = html;
+            }
+
+            function updatePreviewScale() {
+                const previewWidth = previewArea.clientWidth;
+                const previewHeight = previewArea.clientHeight;
+                // J-card real size in pixels at 96dpi: 157mm ≈ 594px, 102mm ≈ 386px
+                const jcardWidthPx = 594;
+                const jcardHeightPx = 386;
+                const padding = 40; // padding on each side
+                const availW = previewWidth - padding * 2;
+                const availH = previewHeight - padding * 2;
+                const scaleW = availW / jcardWidthPx;
+                const scaleH = availH / jcardHeightPx;
+                let scale = Math.min(scaleW, scaleH, 0.85);
+                scale = Math.max(0.3, Math.min(scale, 0.9));
+                previewWrapper.style.transform = `scale(${scale})`;
+            }
+
+            // ============ TOAST ============
+            let toastTimeout;
+
+            function showToast(msg, type = '') {
+                clearTimeout(toastTimeout);
+                toast.textContent = msg;
+                toast.className = 'toast ' + type + ' show';
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2500);
+            }
+
+            // ============ EVENT HANDLERS ============
+
+            function bindInput(id, prop) {
+                const el = $(`#${id}`);
+                if (!el) return;
+                el.addEventListener('input', () => {
+                    state[prop] = el.value;
+                    updatePreviews();
+                });
+                el.addEventListener('change', () => {
+                    state[prop] = el.value;
+                    updatePreviews();
+                });
+            }
+
+            bindInput('albumTitle', 'title');
+            bindInput('albumArtist', 'artist');
+            bindInput('albumYear', 'year');
+            bindInput('albumCatalog', 'catalog');
+            bindInput('tracklistA', 'tracklistA');
+            bindInput('tracklistB', 'tracklistB');
+            bindInput('abaAText', 'abaAText');
+            bindInput('abaBText', 'abaBText');
+            bindInput('bgFront', 'bgFront');
+            bindInput('bgBack', 'bgBack');
+            bindInput('bgSpine', 'bgSpine');
+            bindInput('bgAba', 'bgAba');
+            bindInput('textColor', 'textColor');
+
+            $('#fontSelect').addEventListener('change', function() {
+                state.fontFamily = this.value;
+                updatePreviews();
+            });
+
+            $('#alignSelect').addEventListener('change', function() {
+                state.align = this.value;
+                updatePreviews();
+            });
+
+            $('#autoNumber').addEventListener('change', function() {
+                state.autoNumber = this.checked;
+                updatePreviews();
+            });
+
+            // Upload de imagem
+            coverImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                    showToast('Por favor, selecione uma imagem válida.', '');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    state.coverImage = ev.target.result;
+                    updatePreviews();
+                    fileUploadArea.classList.add('has-image');
+                    removeImageBtn.style.display = 'block';
+                    const uploadText = fileUploadArea.querySelector('.upload-text');
+                    if (uploadText) uploadText.textContent = file.name;
+                    showToast('✅ Imagem carregada!', 'success');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            removeImageBtn.addEventListener('click', function() {
+                state.coverImage = null;
+                updatePreviews();
+                fileUploadArea.classList.remove('has-image');
+                removeImageBtn.style.display = 'none';
+                coverImageInput.value = '';
+                const uploadText = fileUploadArea.querySelector('.upload-text');
+                if (uploadText) uploadText.textContent = 'Clique para enviar uma imagem de capa';
+                showToast('Imagem removida.', '');
+            });
+
+            // Drag & Drop na área de upload
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#e94560';
+                this.style.background = 'rgba(233,68,96,0.08)';
+            });
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--border)';
+                this.style.background = 'var(--input-bg)';
+                if (state.coverImage) {
+                    this.classList.add('has-image');
+                }
+            });
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--border)';
+                this.style.background = 'var(--input-bg)';
+                if (state.coverImage) this.classList.add('has-image');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    coverImageInput.files = e.dataTransfer.files;
+                    coverImageInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            // Templates
+            const templates = {
+                classic: {
+                    bgFront: '#ffffff',
+                    bgBack: '#fafafa',
+                    bgSpine: '#e8e8e8',
+                    bgAba: '#f5f5f5',
+                    textColor: '#111111',
+                    fontFamily: "'Georgia','Times New Roman',serif",
+                    align: 'center',
+                },
+                neon: {
+                    bgFront: '#1a0033',
+                    bgBack: '#0d001a',
+                    bgSpine: '#2d0055',
+                    bgAba: '#150028',
+                    textColor: '#e040fb',
+                    fontFamily: "'Bebas Neue','Impact',sans-serif",
+                    align: 'center',
+                },
+                vintage: {
+                    bgFront: '#fdf5e6',
+                    bgBack: '#faf0dc',
+                    bgSpine: '#d4c5a9',
+                    bgAba: '#f0e6d0',
+                    textColor: '#3b2f1e',
+                    fontFamily: "'Georgia','Times New Roman',serif",
+                    align: 'center',
+                },
+                dark: {
+                    bgFront: '#1a1a1a',
+                    bgBack: '#111111',
+                    bgSpine: '#2a2a2a',
+                    bgAba: '#1e1e1e',
+                    textColor: '#e0e0e0',
+                    fontFamily: "'Inter','Arial',sans-serif",
+                    align: 'center',
+                },
+                pastel: {
+                    bgFront: '#ffeef8',
+                    bgBack: '#fff5f9',
+                    bgSpine: '#fddde6',
+                    bgAba: '#ffe8f0',
+                    textColor: '#4a3040',
+                    fontFamily: "'Inter','Arial',sans-serif",
+                    align: 'center',
+                },
+                retro80s: {
+                    bgFront: '#ffdd00',
+                    bgBack: '#ffe44d',
+                    bgSpine: '#ff6600',
+                    bgAba: '#ffcc00',
+                    textColor: '#1a0040',
+                    fontFamily: "'Press Start 2P',monospace",
+                    align: 'center',
+                },
+            };
+
+            $('#templateChips').addEventListener('click', function(e) {
+                const chip = e.target.closest('.template-chip');
+                if (!chip) return;
+                const templateName = chip.dataset.template;
+                const tpl = templates[templateName];
+                if (!tpl) return;
+
+                // Update state
+                Object.keys(tpl).forEach(key => {
+                    state[key] = tpl[key];
+                });
+                state.activeTemplate = templateName;
+
+                // Update UI
+                $('#bgFront').value = state.bgFront;
+                $('#bgBack').value = state.bgBack;
+                $('#bgSpine').value = state.bgSpine;
+                $('#bgAba').value = state.bgAba;
+                $('#textColor').value = state.textColor;
+                $('#fontSelect').value = state.fontFamily;
+                $('#alignSelect').value = state.align;
+
+                // Highlight active chip
+                $$('.template-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+
+                updatePreviews();
+                showToast(`🎨 Template "${templateName}" aplicado!`, 'success');
+            });
+
+            // ============ IMPRESSÃO ============
+            $('#printBtn').addEventListener('click', function() {
+                // Garantir que a área de impressão está atualizada
+                printJcard.innerHTML = generateJCardHTML(state);
+                // Pequeno delay para garantir renderização
+                setTimeout(() => {
+                    window.print();
+                }, 150);
+                showToast('🖨️ Abrindo diálogo de impressão...', '');
+            });
+
+            // ============ DOWNLOAD PNG ============
+            $('#downloadPngBtn').addEventListener('click', async function() {
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+                btn.disabled = true;
+
+                try {
+                    // Atualizar área de impressão
+                    printJcard.innerHTML = generateJCardHTML(state);
+
+                    // Clonar para captura visível
+                    const clone = printJcard.cloneNode(true);
+                    clone.style.position = 'fixed';
+                    clone.style.top = '0';
+                    clone.style.left = '0';
+                    clone.style.zIndex = '99999';
+                    clone.style.width = '157mm';
+                    clone.style.height = '102mm';
+                    clone.style.margin = '0';
+                    clone.style.boxShadow = 'none';
+                    clone.style.borderRadius = '0';
+                    document.body.appendChild(clone);
+
+                    // Aguardar renderização
+                    await new Promise(r => setTimeout(r, 200));
+
+                    const canvas = await html2canvas(clone, {
+                        scale: 4,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        width: clone.offsetWidth,
+                        height: clone.offsetHeight,
+                    });
+
+                    // Remover clone
+                    document.body.removeChild(clone);
+
+                    // Download
+                    const link = document.createElement('a');
+                    const safeName = (state.artist + ' - ' + state.title).replace(/[^a-z0-9]/gi, '_')
+                        .substring(0, 60) || 'jcard';
+                    link.download = safeName + '.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                    showToast('✅ PNG baixado com sucesso! (alta resolução)', 'success');
+                } catch (err) {
+                    console.error('Erro ao gerar PNG:', err);
+                    showToast('❌ Erro ao gerar PNG. Tente novamente.', '');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+
+            // ============ RESIZE HANDLER ============
+            let resizeDebounce;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeDebounce);
+                resizeDebounce = setTimeout(updatePreviewScale, 150);
+            });
+
+            // ============ KEYBOARD SHORTCUTS ============
+            window.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    $('#printBtn').click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    $('#downloadPngBtn').click();
+                }
+            });
+
+            // ============ INIT ============
+            function init() {
+                // Set initial UI values
+                $('#bgFront').value = state.bgFront;
+                $('#bgBack').value = state.bgBack;
+                $('#bgSpine').value = state.bgSpine;
+                $('#bgAba').value = state.bgAba;
+                $('#textColor').value = state.textColor;
+                $('#fontSelect').value = state.fontFamily;
+                $('#alignSelect').value = state.align;
+
+                updatePreviews();
+                updatePreviewScale();
+
+                // Pequeno delay para recalcular escala após pintura
+                setTimeout(updatePreviewScale, 300);
+                setTimeout(updatePreviewScale, 800);
+            }
+
+            init();
+
+            console.log('🎵 Criador de J-Card para Cassette pronto!');
+            console.log('📐 Dimensões: 157mm × 102mm (com abas para colar na fita)');
+            console.log('🖨️  Ctrl+P para imprimir | Ctrl+S para baixar PNG');
+            console.log('💡 Configure a impressora para "Tamanho real" (100%) e margens mínimas.');
+        })();
+    </script>
+</body>
+</html>
